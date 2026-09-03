@@ -85,21 +85,26 @@ function get_active_interface()
     return network_interface_cache
 end
 
--- Fonction pour afficher tous les cœurs CPU
+-- Fonction pour afficher tous les cœurs CPU (compact: 2 par ligne)
 function conky_show_cpus()
     local cpu_count = get_cpu_count()
     local result = ""
+    local i = 1
 
-    for i = 1, cpu_count do
-        if i <= 16 then
-            result = result .. "${color2}│${color} CPU" .. i .. ": ${cpu cpu" .. i .. "}% ${alignr}${color5}${cpubar 6,100 cpu" .. i .. "}\n"
+    while i <= cpu_count and i <= 16 do
+        local line = "${color2}│${color}"
+        line = line .. " C" .. i .. ": ${cpu cpu" .. i .. "}%"
+        if i + 1 <= cpu_count and i + 1 <= 16 then
+            line = line .. "  C" .. (i + 1) .. ": ${cpu cpu" .. (i + 1) .. "}%"
         end
+        result = result .. line .. "\n"
+        i = i + 2
     end
 
     return result
 end
 
--- Fonction pour afficher l'interface réseau active
+-- Fonction pour afficher l'interface réseau active (compact)
 function conky_show_network()
     local iface = get_active_interface()
 
@@ -114,15 +119,11 @@ function conky_show_network()
     end
 
     local result = string.format(
-        "${color2}│ ${color4}%s (%s):${color} ${addr %s}\n" ..
-        "${color2}│${color}  ↓ Téléchargement: ${downspeed %s}/s ${alignr}${totaldown %s}\n" ..
-        "${color1}│${color}  ${downspeedgraph %s 25,298 4a8b30 87c540 -t}\n" ..
-        "${color2}│${color}  ↑ Envoi: ${upspeed %s}/s ${alignr}${totalup %s}\n" ..
-        "${color1}│${color}  ${upspeedgraph %s 25,298 4a8b30 f5a623 -t}",
-        iface_type, iface, iface,
-        iface, iface,
-        iface,
-        iface, iface,
+        "${color2}│ ${color4}%s (${addr %s})${color}\n" ..
+        "${color2}│${color} ↓ ${downspeed %s}/s  ↑ ${upspeed %s}/s${alignr}${totaldown %s}\n" ..
+        "${color1}│${color} ${downspeedgraph %s 18,298 4a8b30 87c540 -t}",
+        iface_type, iface,
+        iface, iface, iface,
         iface
     )
 
